@@ -42,11 +42,11 @@ struct Nodo{
     vector<Nodo*>child; // [Nodo1,Nodo2,Nodo3,Nodo4]
     int dim;
     Nodo *parent;
-    Nodo(int n_dim,Nodo*n_parent=NULL){
+    Nodo(int n_dim,bool leaf=false){ //Nodo (3,true) is Leaf && Nodo(3,false) is Data
         dim=n_dim;
-        isLeaf=false;
-        isData=true;
-        parent=n_parent;
+        isLeaf=leaf;
+        isData=!leaf;
+        //parent=n_parent;
         I.resize(n_dim);
     }
     bool overlap(vData pI){
@@ -123,14 +123,12 @@ struct RTree{
     int M,m;
     int dim;
     Nodo *root;
-    RTree(int n_M, int n_m,int n_dim){
+    RTree(int n_dim,int n_m,int n_M){
         M=n_M;
         m=n_m;
-        root=new Nodo(n_dim);
+        root=new Nodo(n_dim,true);
         dim=n_dim;
     }
-
-
 
     bool search(Nodo *&p,vData pI){ //Buscar un punto o un rectangulo
         // S2 /////////
@@ -148,7 +146,7 @@ struct RTree{
         return false;
     }
 
-     bool insert(Nodo *E){ 
+    bool insert(Nodo *E){ 
         Nodo* L,*LL;
         // I1 ////////
         chooseLeaf(E->I,L);
@@ -165,7 +163,7 @@ struct RTree{
         adjustTree(L,LL); // SI no hubo split LL==NULL
         // I4 //////
         if(L==root and LL!=NULL){
-            Nodo* tempRoot=new Nodo(dim);
+            Nodo* tempRoot=new Nodo(dim,false);
             tempRoot->addEntry(L);
             tempRoot->addEntry(LL);
             root=tempRoot;
@@ -202,6 +200,7 @@ struct RTree{
         while(N!=root){
             // AT3 | ET3x ///////
             Nodo *P=N->parent;
+            P->isLeaf=false;
             for(int i=0;i<dim;i++){
                 if(N->I[i][0] < P->I[i][0])
                     P->I[i][0] = N->I[i][0];
@@ -230,9 +229,10 @@ struct RTree{
         float Ed1,Ed2;
         vector<Nodo*>LP;
         LP=G1->child;
+        bool checkLeaf=G1->isLeaf;
         pickSeeds(LP,E1,E2);
-        G1=new Nodo(dim); //Nodos como grupos G1, G2;
-        G2=new Nodo(dim);
+        G1=new Nodo(dim,checkLeaf); //Nodos como grupos G1, G2;
+        G2=new Nodo(dim,checkLeaf);
         G1->addEntry(E1);
         G2->addEntry(E2);
         // QS2 //////////
@@ -320,14 +320,8 @@ struct RTree{
             return;
         }
     }
-
-    
-
-    
-
-   
-    
 };
+
 
 
 int main(){
