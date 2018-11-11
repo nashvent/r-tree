@@ -87,7 +87,7 @@ void displayGizmo()
 		glEnd();
 	}*/
 	//////////////////////////////////////////////
-	/*if(showCircle)
+	if(showCircle)
 	{	
 		glBegin(GL_POINTS);
 		glColor3d(1.0,0.5,0.0);
@@ -100,9 +100,9 @@ void displayGizmo()
 		}
 		glEnd();
 
-		qt->buscarCirculo(Punto(centrox,centroy),radio);
+		//qt->buscarCirculo(Punto(centrox,centroy),radio);
 		
-	}*/
+	}
 
 	//qt->PertCirculo(qt->m_head,Ra[0].x,Ra[0].y,radio);
 	/*EPuntos.clear();
