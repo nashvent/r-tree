@@ -22,7 +22,7 @@ RTree *rt;
 vector<Nodo*> puntos;
 bool ial = false;
 bool showCircle=false;
-
+int dim;
 
 double radio=0,calx,caly,centrox,centroy;
 
@@ -124,9 +124,13 @@ void OnMouseClick(int button, int state, int x, int y)
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
 	{
 		adaptRawPoint(x,y);
-		//Punto pt(x,y);
-		//qt->insert(pt);
-		//qt->draw();
+		Data vtmp;
+		vtmp.push_back(x);
+		vtmp.push_back(y);
+		Nodo *tmp=new Nodo(dim,vtmp);
+        printData(vtmp);
+        rt->insert(tmp);
+		rt->getRectangles();
 	}
 	else if(button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
 	{
@@ -207,9 +211,6 @@ void normalizar(float &x,float a,float b,float xmax,float xmin){
 	x=a+((x-xmin)*(b-a))/(xmax-xmin);
 }
 
-
-
-
 int main(int argc, char* argv[]){
     //srand (time(NULL));
 	glutInit(&argc, argv);
@@ -229,7 +230,7 @@ int main(int argc, char* argv[]){
 	glutIdleFunc(&idle);
 
 
-    int dim=2;
+    dim=2;
     rt=new RTree(dim,2,4); //(dimension,m,M)
     vData vrd;
 	float xmax=0,xmin=100000;
