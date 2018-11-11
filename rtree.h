@@ -208,8 +208,7 @@ struct RTree{
     void chooseLeaf(vData E,Nodo *&N){
         // CL1 ////////
         N=root;
-        // CL2  ///////
-        
+        // CL2  /////// 
         while(!N->isLeaf){
             float tempArea=INFINITY;
             Nodo *TN;
@@ -235,13 +234,6 @@ struct RTree{
             // AT3 | ET3x ///////
             Nodo *P=N->parent;
             P->isLeaf=false;
-            /*for(int i=0;i<dim;i++){
-                if(N->I[i][0] < P->I[i][0])
-                    P->I[i][0] = N->I[i][0];
-                if(N->I[i][1] > P->I[i][1])
-                    P->I[i][1] = N->I[i][1];
-            } */
-              
             // AT4 | ET4 ////////
             Nodo *PP=NULL;
             if(NN!=NULL){
@@ -275,29 +267,16 @@ struct RTree{
         G2->addEntry(E2); 
         
         // QS2 //////////
-        while(LP.size()>0){
-            
-            if(G1->child.size()>=m or G2->child.size()>=m and (G1->child.size()!=G2->child.size())){
-                if(G1->child.size()<m ){
-                    G1->child.insert(G1->child.end(), LP.begin(), LP.end());
-                    G1->updateRectangleI();
-                    //cout<<"G1"<<endl;
-                    //G1->print();
-                    //cout<<"G2"<<endl;
-                    //G2->print();
-                    return;
-                }
-                else{
-                    G2->child.insert( G2->child.end(), LP.begin(), LP.end());
-                    G2->updateRectangleI();
-                    cout<<"G1"<<endl;
-                    G1->print();
-                    cout<<"G2"<<endl;
-                    G2->print();
-                    return;
-                }
-                
-                
+        while(LP.size()>0){   
+            if( (G1->child.size()+LP.size())==m ){
+                G1->child.insert(G1->child.end(), LP.begin(), LP.end());
+                G1->updateRectangleI();
+                return;
+            }
+            if( (G2->child.size()+LP.size())==m ){
+                G2->child.insert(G2->child.end(), LP.begin(), LP.end());
+                G2->updateRectangleI();
+                return;
             }
             // QS3 ////////
             pickNext(LP,G1,G2);
@@ -344,7 +323,7 @@ struct RTree{
 
     void pickNext(vector<Nodo*>&LP,Nodo* &G1,Nodo* &G2){     
         int indxE1,indxE2;
-        float dG1=1000000,dG2=1000000;
+        float dG1=INFINITY,dG2=INFINITY;
         //vData G1,G2;
         float aG1=area(G1->I);
         float aG2=area(G2->I);
@@ -419,8 +398,6 @@ struct RTree{
 
     void getRectanglesR(Nodo *P){
         for(int i=0;i<P->child.size();i++){
-            //cout<<"printadata"<<endl;
-            //printVData(P->I);
             allRectangles.push_back(P->I);
             getRectanglesR(P->child[i]);
         }

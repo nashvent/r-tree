@@ -199,13 +199,11 @@ GLvoid window_key(unsigned char key, int x, int y) {
 	case KEY_ESC:
 		exit(0);
 		break;
-
 	default:
 		break;
 	}
 
 }
-
 
 void normalizar(float &x,float a,float b,float xmax,float xmin){
 	x=a+((x-xmin)*(b-a))/(xmax-xmin);
@@ -233,8 +231,8 @@ int main(int argc, char* argv[]){
     dim=2;
     rt=new RTree(dim,2,4); //(dimension,m,M)
     vData vrd;
-	float xmax=0,xmin=100000;
-	float ymax=0,ymin=100000;
+	float xmax=-INFINITY,xmin=INFINITY;
+	float ymax=-INFINITY,ymin=INFINITY;
 	for(int i=0;i<10;i++){
         Data rnd=randomData(dim);
         vrd.push_back(rnd);	
