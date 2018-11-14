@@ -255,7 +255,13 @@ int main(int argc, char* argv[]){
 	clock_t end = clock();
   	double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
 	cout<<"r-tree generado en "<<elapsed_secs<<" segundos"<<endl;
-
+	cout<<"ChooseLEaf "<<timeChosseLeaf<<endl;
+	cout<<"Adjust tree "<<timeAdjustTree<<endl;
+	cout<<"Split "<<timeSplit<<endl;
+	cout<<"Update Rectange "<<timeUpdateRectangle<<endl;
+	cout<<"AddEntry  "<<timeAddEntry<<endl;
+	cout<<"TimePickSeeds  "<<timePickSeeds<<endl;
+	cout<<"TimePick Next "<<timePickNext<<endl;
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
 	glutInitWindowSize(600,600); 

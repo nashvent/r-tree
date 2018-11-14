@@ -6,7 +6,7 @@ typedef vector<Data> vData;
 
 
 /////////////////////////
-float tInsert,tChosseLeaf;
+float timeAdjustTree=0,timeChosseLeaf=0,timeSplit=0,timeUpdateRectangle=0,timeAddEntry=0,timePickSeeds=0,timePickNext=0;
 /////////////////////////
 float area(vData mm){
     float areaCalc=1;
@@ -118,8 +118,8 @@ struct Nodo{
     }
 
     void addEntry(Nodo *E){
-        //vData nI=makeRectangle(I,E->I);
-        //I=nI;
+        clock_t begin = clock(); 
+
         int ext=exist(E->I);
         if(ext==-1){
             child.push_back(E);
@@ -129,7 +129,9 @@ struct Nodo{
         else{
             //cout<<"Elemento existe"<<endl;
         }
-            
+        clock_t end = clock();
+        double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+        timeAddEntry+=elapsed_secs;   
         
     }
 
@@ -140,6 +142,7 @@ struct Nodo{
     }
     
     void updateRectangleI(){
+        clock_t begin = clock();
         if(child.size()==1){
             I=child[0]->I;
         }
@@ -155,6 +158,9 @@ struct Nodo{
                 }
             }
         }
+        clock_t end = clock();
+        double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+        timeUpdateRectangle+=elapsed_secs;
     }
 
     void print(){   
@@ -219,6 +225,7 @@ struct RTree{
     }
 
     void chooseLeaf(vData E,Nodo *&N){
+        clock_t begin = clock();
         // CL1 ////////
         N=root;
         // CL2  /////// 
@@ -236,10 +243,14 @@ struct RTree{
             // CL4 /////
             N=TN;
         }
+        clock_t end = clock();
+  	    double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+        timeChosseLeaf+=elapsed_secs;
         return;
     }
 
-    void adjustTree(Nodo* &N,Nodo*&NN){ // Expand tree 
+    void adjustTree(Nodo* &N,Nodo*&NN){ // Expand tree
+        clock_t begin = clock(); 
         // AT1 | ET1 ////////
             /* Paso AT1 en la declaracion*/
         // AT2 | ET2 ////////
@@ -260,13 +271,18 @@ struct RTree{
             N=P;
             NN=PP;
             
+            
         }
         root->updateRectangleI();
+        clock_t end = clock();
+        double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+        timeAdjustTree+=elapsed_secs;
         return;
     }
 
     //Quadratic Split
-    void splitNode(Nodo* &G1,Nodo* &G2){        
+    void splitNode(Nodo* &G1,Nodo* &G2){
+        clock_t begin = clock(); 
         // QS1 ////////////
         Nodo *E1,*E2;
         float Ed1,Ed2;
@@ -281,23 +297,30 @@ struct RTree{
         
         // QS2 //////////
         while(LP.size()>0){   
+        
             if( (G1->child.size()+LP.size())==m ){
                 G1->child.insert(G1->child.end(), LP.begin(), LP.end());
                 G1->updateRectangleI();
-                return;
+                LP.resize(0);
             }
-            if( (G2->child.size()+LP.size())==m ){
+            else if( (G2->child.size()+LP.size())==m ){
                 G2->child.insert(G2->child.end(), LP.begin(), LP.end());
                 G2->updateRectangleI();
-                return;
+                LP.resize(0);
             }
             // QS3 ////////
-            pickNext(LP,G1,G2);
+            if(LP.size()>0)
+                pickNext(LP,G1,G2);
         }
+        clock_t end = clock();
+        double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+        timeSplit+=elapsed_secs;
+        
         return;
     }
 
     void pickSeeds(vector<Nodo*>&LP,Nodo* &E1,Nodo* &E2){
+        clock_t begin = clock(); 
         float d=0;
         int indxE1,indxE2;
         
@@ -331,10 +354,13 @@ struct RTree{
         }
         LP.erase(LP.begin()+indxE2);
         LP.erase(LP.begin()+indxE1);
-        
+        clock_t end = clock();
+        double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+        timePickSeeds+=elapsed_secs;   
     }
 
-    void pickNext(vector<Nodo*>&LP,Nodo* &G1,Nodo* &G2){     
+    void pickNext(vector<Nodo*>&LP,Nodo* &G1,Nodo* &G2){    
+        clock_t begin = clock();  
         int indxE1,indxE2;
         float dG1=INFINITY,dG2=INFINITY;
         //vData G1,G2;
@@ -368,6 +394,9 @@ struct RTree{
             G2->addEntry(LP[indxE2]);
             LP.erase(LP.begin()+indxE2);
         }
+        clock_t end = clock();
+        double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+        timePickNext+=elapsed_secs;
     }
 
     void print(){
