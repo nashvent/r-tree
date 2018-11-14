@@ -103,14 +103,6 @@ void displayGizmo()
 		//qt->buscarCirculo(Punto(centrox,centroy),radio);
 		
 	}
-
-	//qt->PertCirculo(qt->m_head,Ra[0].x,Ra[0].y,radio);
-	/*EPuntos.clear();
-	qt->drawCirculo(centrox,centroy,radio);
-	//qt->areaCirculo(centrox,centroy,radio);
-
-	//qt->DistRadio(qt->m_head,radio,centrox,centroy);
-	*/
 	glPointSize(2);
 	glBegin(GL_POINTS);
 	glColor3d(1.0,1.0,0.0);
@@ -128,6 +120,8 @@ void OnMouseClick(int button, int state, int x, int y)
 		vtmp.push_back(x);
 		vtmp.push_back(y);
 		Nodo *tmp=new Nodo(dim,vtmp);
+		cout<<"##################"<<endl;
+        cout<<"insert: ";
         printData(vtmp);
         rt->insert(tmp);
 		rt->getRectangles();

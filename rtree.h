@@ -115,9 +115,15 @@ struct Nodo{
     void addEntry(Nodo *E){
         //vData nI=makeRectangle(I,E->I);
         //I=nI;
-        child.push_back(E);
-        E->parent=this;
-        updateRectangleI();
+        int ext=exist(E->I);
+        if(ext==-1){
+            child.push_back(E);
+            E->parent=this;
+            updateRectangleI();
+        }
+        else
+            cout<<"Elemento existe"<<endl;
+        
     }
 
     bool searchData(Data T){
