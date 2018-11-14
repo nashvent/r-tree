@@ -3,6 +3,11 @@
 using namespace std;
 typedef vector<float> Data;
 typedef vector<Data> vData;
+
+
+/////////////////////////
+float tInsert,tChosseLeaf;
+/////////////////////////
 float area(vData mm){
     float areaCalc=1;
     for(int i=0;i<mm.size();i++){
@@ -121,8 +126,10 @@ struct Nodo{
             E->parent=this;
             updateRectangleI();
         }
-        else
-            cout<<"Elemento existe"<<endl;
+        else{
+            //cout<<"Elemento existe"<<endl;
+        }
+            
         
     }
 

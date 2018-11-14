@@ -55,7 +55,7 @@ void displayGizmo()
 	}
     glEnd();
 
-	glPointSize(3);
+	glPointSize(1);
 	glBegin(GL_POINTS);
 	glColor3d(255,0,0);
 	for(unsigned i=0;i<rt->allPoints.size();i++){	
@@ -154,14 +154,8 @@ void glPaint(void) {
 	//El fondo de la escena al color initial
 	glClear(GL_COLOR_BUFFER_BIT); //CAMBIO
 	glLoadIdentity();
-	//glOrtho(xmin,xmax,ymin,ymax,-1.0f,1.0f);
 	glOrtho(-300.0f,300.0f,-300.0f,300.0f,-1.0f,1.0f);
-
-	//lsqt->draw();
 	displayGizmo();
-
-	//dldraw();
-	//doble buffer, mantener esta instruccion al fin de la funcion
 	glutSwapBuffers();
 }
 
@@ -205,6 +199,63 @@ void normalizar(float &x,float a,float b,float xmax,float xmin){
 
 int main(int argc, char* argv[]){
     //srand (time(NULL));
+	int m,M;
+	string stm=argv[1];
+	string stM=argv[2];
+	cout<<"m: "<<stm<<" M: "<<stM<<endl;
+	m=atoi( stm.c_str());
+	M=atoi( stM.c_str());
+    dim=2;
+    rt=new RTree(dim,m,M); //(dimension,m,M)
+    vData vrd;
+	float xmax=-INFINITY,xmin=INFINITY;
+	float ymax=-INFINITY,ymin=INFINITY;
+
+	/*for(int i=0;i<10;i++){
+        Data rnd=randomData(dim);
+        vrd.push_back(rnd);	
+		if(rnd[0]>xmax) xmax=rnd[0];
+		if(rnd[0]<xmin) xmin=rnd[0];
+		if(rnd[1]>ymax) ymax=rnd[1];
+		if(rnd[1]<ymin) ymin=rnd[1];
+	}*/
+	ifstream file("crime50k.csv");
+    string str;
+    int cont=0;
+    while (std::getline(file, str))
+    {
+        vector<string>temp;
+        string strtemp=str;
+        temp=splitString(strtemp);
+        float xtemp = ::atof(temp[18].c_str());
+        float ytemp = ::atof(temp[19].c_str());
+		if(xtemp>35 and xtemp<45 ){
+			if(xmax<xtemp) xmax=xtemp;
+			if(xmin>xtemp) xmin=xtemp;
+			if(ymax<ytemp) ymax=ytemp;
+			if(ymin>ytemp) ymin=ytemp;
+			Data rnd;
+			rnd.push_back(xtemp);
+			rnd.push_back(ytemp);
+			vrd.push_back(rnd);	
+		}		
+		
+        cont++;
+    }
+	clock_t begin = clock();
+
+    for(int i=0;i<vrd.size();i++){
+		normalizar(vrd[i][0],-300,300,xmax,xmin);
+		normalizar(vrd[i][1],-300,300,ymax,ymin);
+        Nodo *tmp=new Nodo(dim,vrd[i]);
+        rt->insert(tmp);
+        //rt->print();
+    }
+	rt->getRectangles();
+	clock_t end = clock();
+  	double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+	cout<<"r-tree generado en "<<elapsed_secs<<" segundos"<<endl;
+
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
 	glutInitWindowSize(600,600); 
@@ -220,35 +271,7 @@ int main(int argc, char* argv[]){
 	glutMouseFunc(&OnMouseClick);
 	glutMotionFunc(&OnMouseMotion);
 	glutIdleFunc(&idle);
-
-
-    dim=2;
-    rt=new RTree(dim,2,4); //(dimension,m,M)
-    vData vrd;
-	float xmax=-INFINITY,xmin=INFINITY;
-	float ymax=-INFINITY,ymin=INFINITY;
-	for(int i=0;i<10;i++){
-        Data rnd=randomData(dim);
-        vrd.push_back(rnd);	
-		if(rnd[0]>xmax) xmax=rnd[0];
-		if(rnd[0]<xmin) xmin=rnd[0];
-		if(rnd[1]>ymax) ymax=rnd[1];
-		if(rnd[1]<ymin) ymin=rnd[1];
-	}
-
-    for(int i=0;i<vrd.size();i++){
-		
-		normalizar(vrd[i][0],-300,300,xmax+1,xmin-1);
-		normalizar(vrd[i][1],-300,300,ymax+1,ymin-1);
-        Nodo *tmp=new Nodo(dim,vrd[i]);
-        //printData(rnd);
-        cout<<"##################"<<endl;
-        cout<<"insert: ";
-        printData(vrd[i]);
-        rt->insert(tmp);
-        //rt->print();
-    }
-	rt->getRectangles();
+	
     //printVData(vrd);
 
 	glutMainLoop();
