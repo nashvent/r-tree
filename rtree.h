@@ -6,19 +6,32 @@ typedef vector<Data> vData;
 
 
 /////////////////////////
-float timeAdjustTree=0,timeChosseLeaf=0,timeSplit=0,timeUpdateRectangle=0,timeAddEntry=0,timePickSeeds=0,timePickNext=0;
+float timeAdjustTree=0,timeChosseLeaf=0,timeSplit=0,timeUpdateRectangle=0,timeAddEntry=0,timePickSeeds=0,timePickNext=0,
+timeMakeRectangle=0;
 /////////////////////////
 float area(vData mm){
     float areaCalc=1;
-    for(int i=0;i<mm.size();i++){
-        areaCalc=areaCalc*(mm[i][1]-mm[i][0]);
+    for(size_t i=0;i<mm.size();i++){
+        areaCalc=areaCalc*abs(mm[i][1]-mm[i][0]);
     }
     return areaCalc;
 }
 
-vData makeRectangle(vData E1,vData E2){
+float distP2P(Data P1,Data P2){
+    float dist=0;
+    for(size_t i=0;i<P1.size();i++){
+        dist+=abs(P1[i]-P2[i]);
+    }
+    return dist;
+}
+
+
+vData makeRectangle(vData E1,vData E2,float &area){
+    clock_t begin = clock(); 
+
     vData R;
-    for(int i=0;i<E1.size();i++){
+    float areaT=1;
+    for(size_t i=0;i<E1.size();i++){
         vector<float>tempDim(2);
         if(E1[i][0]>E2[i][0])
             tempDim[0]=E2[i][0];
@@ -30,13 +43,19 @@ vData makeRectangle(vData E1,vData E2){
         else
             tempDim[1]=E1[i][1];
         R.push_back(tempDim);
+        areaT=areaT*abs(tempDim[0]-tempDim[1]);
     }
+    area=areaT;
+    clock_t end = clock();
+    double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+    timeMakeRectangle+=elapsed_secs;   
+
     return R;
 }
 
 vData makeRectangleFromData(Data E1){
     vData R;
-    for(int i=0;i<E1.size();i++){
+    for(size_t i=0;i<E1.size();i++){
         vector<float>tempDim(2);
         tempDim[0]=tempDim[1]=E1[i];
         R.push_back(tempDim);
@@ -46,7 +65,7 @@ vData makeRectangleFromData(Data E1){
 
 Data randomData(int dim){
     Data rsp;
-    for(int i=0;i<dim;i++){
+    for(size_t i=0;i<dim;i++){
         int randNum=rand()%100;
         rsp.push_back((float) randNum);
     }
@@ -54,7 +73,7 @@ Data randomData(int dim){
 }
 
 void printData(Data d){
-    for(int i=0;i<d.size();i++){
+    for(size_t i=0;i<d.size();i++){
         cout<<d[i]<<", ";
     }
     cout<<endl;
@@ -75,11 +94,13 @@ struct Nodo{
     Data rPunto;
     int dim;
     Nodo *parent;
+    float areac;
     Nodo(int n_dim,bool leaf=false){ //Nodo (3,true) is Leaf && Nodo(3,false) is Data
         dim=n_dim;
         isLeaf=leaf;
         isData=!leaf;
         parent=NULL;
+        areac=1;
         //I.resize(n_dim);
     }
     Nodo(int n_dim,Data dt){ 
@@ -88,10 +109,11 @@ struct Nodo{
         isData=true;
         I=makeRectangleFromData(dt);
         rPunto=dt;
+        areac=1;
     }
     
     bool overlap(vData pI){
-        for(int i=0;i<dim;i++){
+        for(size_t i=0;i<dim;i++){
             if(I[i][0]>pI[i][0] or pI[i][1]>I[i][1]){
                 return false;
             }
@@ -100,7 +122,7 @@ struct Nodo{
     }
 
     int exist(vData pI){
-        for(int i=0;i<child.size();i++){
+        for(size_t i=0;i<child.size();i++){
             if(child[i]->I==pI){
                 return i;
             }
@@ -109,7 +131,7 @@ struct Nodo{
     }
 
     bool deleteChild(Nodo*H){
-        for(int i=0;i<child.size();i++)
+        for(size_t i=0;i<child.size();i++)
             if(child[i]==H){
                 child.erase(child.begin()+i);
                 return true;
@@ -143,12 +165,14 @@ struct Nodo{
     
     void updateRectangleI(){
         clock_t begin = clock();
+        areac=1;
         if(child.size()==1){
             I=child[0]->I;
         }
         else{
-            for(int i=0;i<child.size();i++){
-                for(int j=0;j<dim;j++){
+            
+            for(size_t i=0;i<child.size();i++){
+                for(size_t j=0;j<dim;j++){
                     if(child[i]->I[j][0] < I[j][0] ){
                         I[j][0]=child[i]->I[j][0];
                     }
@@ -156,7 +180,9 @@ struct Nodo{
                         I[j][1]=child[i]->I[j][1];
                     }
                 }
+                
             }
+            areac=area(I);
         }
         clock_t end = clock();
         double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
@@ -170,12 +196,14 @@ struct Nodo{
 };
 
 
+
 struct RTree{
     int M,m;
     int dim;
     Nodo *root;
     vector<vData> allRectangles;
     vector<Data> allPoints;
+    vector<Data> radioPoints;
     RTree(int n_dim,int n_m,int n_M){
         M=n_M;
         m=n_m;
@@ -189,7 +217,7 @@ struct RTree{
             return true;
         }
         // S1 ///////
-        for(int x=0;x<p->child.size();x++){
+        for(size_t x=0;x<p->child.size();x++){
             Nodo*currChild=p->child[x];
             if(currChild->overlap(pI)){
                 search(currChild,pI);
@@ -232,9 +260,12 @@ struct RTree{
         while(!N->isLeaf){
             float tempArea=INFINITY;
             Nodo *TN;
-            for(int i=0;i<N->child.size();i++){
-                float nTempArea=area(makeRectangle(E,N->child[i]->I));
+            int childSize=N->child.size();
+            for(size_t i=0;i<childSize;i++){
+                float nTempArea;
+                makeRectangle(E,N->child[i]->I,nTempArea);
                 // CL3 /////
+                nTempArea=nTempArea- N->child[i]->areac;
                 if(tempArea>nTempArea){
                     TN=N->child[i];
                     tempArea=nTempArea;
@@ -325,17 +356,18 @@ struct RTree{
         int indxE1,indxE2;
         
         // PS1 //////////////
-        for(int x1=0;x1<LP.size();x1++){
-            for(int x2=0;x2<LP.size();x2++){
+        for(size_t x1=0;x1<LP.size();x1++){
+            for(size_t x2=0;x2<LP.size();x2++){
                 if(x1!=x2){
-                    vData J=makeRectangle(LP[x1]->I,LP[x2]->I);
+                    float areaJ;
+                    vData J=makeRectangle(LP[x1]->I,LP[x2]->I,areaJ);
                     float a1=area(LP[x1]->I);
                     float a2=area(LP[x2]->I);
                     if(a1==0)
                         a1=1;
                     if(a2==0)
                         a2=1;
-                    float td=area(J)*a1*a2;
+                    float td=areaJ*a1*a2;
                     // PS2 /////////////////////
                     if(td>=d){
                         E1=LP[x1];
@@ -368,11 +400,12 @@ struct RTree{
         float aG2=area(G2->I);
         vData ntG1,ntG2;
         // PN1 ///////
-        for(int i=0;i<LP.size();i++){
-            vData tG1=makeRectangle(G1->I,LP[i]->I);
-            vData tG2=makeRectangle(G2->I,LP[i]->I);
-            float tdG1=area(tG1)-aG1;
-            float tdG2=area(tG2)-aG2;
+        for(size_t i=0;i<LP.size();i++){
+            float areaG1,areaG2;
+            vData tG1=makeRectangle(G1->I,LP[i]->I,areaG1);
+            vData tG2=makeRectangle(G2->I,LP[i]->I,areaG2);
+            float tdG1=areaG1-aG1;
+            float tdG2=areaG2-aG2;
             if(tdG1<dG1){
                 indxE1=i; //Indice en LP
                 dG1=tdG1; //Diferencia agregando la nueva entrada
@@ -439,12 +472,56 @@ struct RTree{
     }
 
     void getRectanglesR(Nodo *P){
-        for(int i=0;i<P->child.size();i++){
+        for(size_t i=0;i<P->child.size();i++){
             allRectangles.push_back(P->I);
             getRectanglesR(P->child[i]);
         }
         if(P->isLeaf){
             return;
         }
+    }
+
+    float getMinimalDistance(Nodo *P, Data Punto){
+        float dist=0;
+        for(size_t i=0;i<Punto.size();i++){
+            if(P->I[i][0]<=Punto[i] and P->I[i][1]>=Punto[i]){
+                dist+=0;    
+            }
+            else{
+                float tdMin=pow(P->I[i][0]-Punto[i],2);
+                float tdMax=pow(P->I[i][1]-Punto[i],2);
+                if(tdMin<tdMax)
+                    dist+=tdMin;
+                else
+                    dist+=tdMax;
+            }
+        }
+        return sqrt(dist);
+    }
+
+    void searchRadio(Data Punto, float radio){
+        vector<Nodo*> RList=root->child;
+        Data RDist;
+        radioPoints.clear();
+        for(size_t i=0;i<RList.size();i++){
+            if(RList[i]->isLeaf){
+                Nodo*LN=RList[i];
+                for(int j=0;j<LN->child.size();j++){
+                    Nodo*tempLN=LN->child[j];
+                    Data TP=tempLN->rPunto;
+                    if(distP2P(Punto,TP)<radio){
+                        radioPoints.push_back(TP);
+                    }
+                }
+            }
+            else{
+                float tdist=getMinimalDistance(RList[i],Punto);
+                if(tdist<=radio){
+                    RList.insert(RList.end(), RList[i]->child.begin(), RList[i]->child.end());
+                }
+            }
+
+        }
+
     }
 };

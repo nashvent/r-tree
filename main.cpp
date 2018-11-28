@@ -64,6 +64,16 @@ void displayGizmo()
 	}
 	glEnd();
 
+	glPointSize(1);
+	glBegin(GL_POINTS);
+	glColor3d(0,255,255);
+	for(unsigned i=0;i<rt->radioPoints.size();i++){	
+		Data pnt=rt->radioPoints[i];
+		glVertex2d(pnt[0],pnt[1]);
+	}
+	glEnd();
+
+
 	/*glPointSize(2);
 	glBegin(GL_POINTS);
 	glColor3d(255,255,0);
@@ -100,8 +110,14 @@ void displayGizmo()
 		}
 		glEnd();
 
-		//qt->buscarCirculo(Punto(centrox,centroy),radio);
+		Data busq;
+		busq.push_back(centrox);
+		busq.push_back(centroy);
+		rt->searchRadio(busq,radio);
 		
+	}
+	else{
+		rt->radioPoints.clear();
 	}
 	glPointSize(2);
 	glBegin(GL_POINTS);
@@ -132,7 +148,7 @@ void OnMouseClick(int button, int state, int x, int y)
 		adaptRawPoint(x,y);
 		centrox=x;
 		centroy=y;
-		//busqueda.clear();
+		
 	}
 }
 
@@ -210,8 +226,8 @@ int main(int argc, char* argv[]){
     vData vrd;
 	float xmax=-INFINITY,xmin=INFINITY;
 	float ymax=-INFINITY,ymin=INFINITY;
-
-	/*for(int i=0;i<10;i++){
+/*
+	for(int i=0;i<10;i++){
         Data rnd=randomData(dim);
         vrd.push_back(rnd);	
 		if(rnd[0]>xmax) xmax=rnd[0];
@@ -262,6 +278,8 @@ int main(int argc, char* argv[]){
 	cout<<"AddEntry  "<<timeAddEntry<<endl;
 	cout<<"TimePickSeeds  "<<timePickSeeds<<endl;
 	cout<<"TimePick Next "<<timePickNext<<endl;
+	cout<<"TimeMakeRectangle  "<<timeMakeRectangle<<endl;
+	
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
 	glutInitWindowSize(600,600); 
