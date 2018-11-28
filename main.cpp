@@ -55,7 +55,7 @@ void displayGizmo()
 	}
     glEnd();
 
-	glPointSize(1);
+	glPointSize(2);
 	glBegin(GL_POINTS);
 	glColor3d(255,0,0);
 	for(unsigned i=0;i<rt->allPoints.size();i++){	
@@ -64,7 +64,7 @@ void displayGizmo()
 	}
 	glEnd();
 
-	glPointSize(1);
+	glPointSize(2);
 	glBegin(GL_POINTS);
 	glColor3d(0,255,255);
 	for(unsigned i=0;i<rt->radioPoints.size();i++){	
@@ -235,6 +235,8 @@ int main(int argc, char* argv[]){
 		if(rnd[1]>ymax) ymax=rnd[1];
 		if(rnd[1]<ymin) ymin=rnd[1];
 	}*/
+
+	
 	ifstream file("crime50k.csv");
     string str;
     int cont=0;
@@ -258,12 +260,14 @@ int main(int argc, char* argv[]){
 		
         cont++;
     }
+	cout<<"Datos leidos..."<<endl;
 	clock_t begin = clock();
 
     for(int i=0;i<vrd.size();i++){
 		normalizar(vrd[i][0],-300,300,xmax,xmin);
 		normalizar(vrd[i][1],-300,300,ymax,ymin);
         Nodo *tmp=new Nodo(dim,vrd[i]);
+		
         rt->insert(tmp);
         //rt->print();
     }
@@ -271,6 +275,8 @@ int main(int argc, char* argv[]){
 	clock_t end = clock();
   	double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
 	cout<<"r-tree generado en "<<elapsed_secs<<" segundos"<<endl;
+	
+	
 	cout<<"ChooseLEaf "<<timeChosseLeaf<<endl;
 	cout<<"Adjust tree "<<timeAdjustTree<<endl;
 	cout<<"Split "<<timeSplit<<endl;

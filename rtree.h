@@ -100,7 +100,7 @@ struct Nodo{
         isLeaf=leaf;
         isData=!leaf;
         parent=NULL;
-        areac=1;
+        areac=0;
         //I.resize(n_dim);
     }
     Nodo(int n_dim,Data dt){ 
@@ -109,7 +109,7 @@ struct Nodo{
         isData=true;
         I=makeRectangleFromData(dt);
         rPunto=dt;
-        areac=1;
+        areac=0;
     }
     
     bool overlap(vData pI){
@@ -165,12 +165,12 @@ struct Nodo{
     
     void updateRectangleI(){
         clock_t begin = clock();
-        areac=1;
+        
         if(child.size()==1){
             I=child[0]->I;
+            areac=0;
         }
         else{
-            
             for(size_t i=0;i<child.size();i++){
                 for(size_t j=0;j<dim;j++){
                     if(child[i]->I[j][0] < I[j][0] ){
@@ -228,12 +228,13 @@ struct RTree{
     }
 
     bool insert(Nodo *E){ 
-        //allPoints.push_back(E);
+        
         allPoints.push_back(E->rPunto);
         Nodo* L,*LL;
         LL=NULL;       
         // I1 ////////
         chooseLeaf(E->I,L);
+        
         // I2 ///////
         L->addEntry(E);
         if(L->child.size()>M){
@@ -325,10 +326,8 @@ struct RTree{
         G2=new Nodo(dim,checkLeaf); //Nodos como grupos G1, G2;
         G1->addEntry(E1);
         G2->addEntry(E2); 
-        
         // QS2 //////////
         while(LP.size()>0){   
-        
             if( (G1->child.size()+LP.size())==m ){
                 G1->child.insert(G1->child.end(), LP.begin(), LP.end());
                 G1->updateRectangleI();
@@ -352,26 +351,20 @@ struct RTree{
 
     void pickSeeds(vector<Nodo*>&LP,Nodo* &E1,Nodo* &E2){
         clock_t begin = clock(); 
-        float d=0;
+        float d=-INFINITY;
         int indxE1,indxE2;
-        
         // PS1 //////////////
-        for(size_t x1=0;x1<LP.size();x1++){
-            for(size_t x2=0;x2<LP.size();x2++){
+        for(int x1=0;x1<LP.size();x1++){
+            for(int x2=0;x2<LP.size();x2++){
                 if(x1!=x2){
                     float areaJ;
                     vData J=makeRectangle(LP[x1]->I,LP[x2]->I,areaJ);
-                    float a1=area(LP[x1]->I);
-                    float a2=area(LP[x2]->I);
-                    if(a1==0)
-                        a1=1;
-                    if(a2==0)
-                        a2=1;
-                    float td=areaJ*a1*a2;
+                    float a1=LP[x1]->areac;//area(LP[x1]->I);
+                    float a2=LP[x2]->areac;//area(LP[x2]->I);
+                    //float td=areaJ;
+                    float td=areaJ-a1-a2;//areaJ*a1*a2;
                     // PS2 /////////////////////
                     if(td>=d){
-                        E1=LP[x1];
-                        E2=LP[x2];
                         d=td;
                         indxE1=x1;
                         indxE2=x2;
@@ -379,7 +372,9 @@ struct RTree{
                 }
             }
         }
-        
+        E1=LP[indxE1];
+        E2=LP[indxE2];
+                   
         /*Remover los seleccionados del grupo*/
         if(indxE1>indxE2){
             swap(indxE1,indxE2);
@@ -396,8 +391,8 @@ struct RTree{
         int indxE1,indxE2;
         float dG1=INFINITY,dG2=INFINITY;
         //vData G1,G2;
-        float aG1=area(G1->I);
-        float aG2=area(G2->I);
+        float aG1=G1->areac;
+        float aG2=G2->areac;
         vData ntG1,ntG2;
         // PN1 ///////
         for(size_t i=0;i<LP.size();i++){
