@@ -260,7 +260,7 @@ int main(int argc, char* argv[]){
 		
         cont++;
     }
-	cout<<"Datos leidos..."<<endl;
+	cout<<"Datos leidos:" <<vrd.size()<<" registros"<<endl;
 	clock_t begin = clock();
 
     for(int i=0;i<vrd.size();i++){

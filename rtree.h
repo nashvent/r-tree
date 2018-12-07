@@ -28,22 +28,22 @@ float distP2P(Data P1,Data P2){
 
 vData makeRectangle(vData E1,vData E2,float &area){
     clock_t begin = clock(); 
-
     vData R;
     float areaT=1;
-    for(size_t i=0;i<E1.size();i++){
-        vector<float>tempDim(2);
+    int E1size=E1.size();
+    for(size_t i=0;i<E1size;i++){
+        float tempMax,tempMin;
         if(E1[i][0]>E2[i][0])
-            tempDim[0]=E2[i][0];
+            tempMin=E2[i][0];
         else
-            tempDim[0]=E1[i][0];
+            tempMin=E1[i][0];
 
         if(E1[i][1]<E2[i][1])
-            tempDim[1]=E2[i][1];
+            tempMax=E2[i][1];
         else
-            tempDim[1]=E1[i][1];
-        R.push_back(tempDim);
-        areaT=areaT*abs(tempDim[0]-tempDim[1]);
+            tempMax=E1[i][1];
+        R.push_back({tempMin,tempMax});
+        areaT=areaT*abs(tempMax-tempMin);
     }
     area=areaT;
     clock_t end = clock();
